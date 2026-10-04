@@ -4493,15 +4493,18 @@ void OutfitStudioFrame::OnRunAutomation(wxCommandEvent& WXUNUSED(event)) {
 void OutfitStudioFrame::OnLoadOutfit(wxCommandEvent& WXUNUSED(event)) {
 	wxDialog dlg;
 	int result = wxID_CANCEL;
+	static bool keepShapes = true;
 
 	CloseBrushSettings();
 
 	if (wxXmlResource::Get()->LoadObject((wxObject*)&dlg, this, "dlgLoadOutfit", "wxDialog")) {
 		XRCCTRL(dlg, "npWorkFilename", wxFilePickerCtrl)->Bind(wxEVT_FILEPICKER_CHANGED, &OutfitStudioFrame::OnLoadOutfitFP_File, this);
 		XRCCTRL(dlg, "npTexFilename", wxFilePickerCtrl)->Bind(wxEVT_FILEPICKER_CHANGED, &OutfitStudioFrame::OnLoadOutfitFP_Texture, this);
-		if (project->GetWorkNif()->IsValid())
+		if (project->GetWorkNif()->IsValid()) {
+			XRCCTRL(dlg, "npWorkAdd", wxCheckBox)->SetValue(keepShapes);
 			XRCCTRL(dlg, "npWorkAdd", wxCheckBox)->Enable();
-
+		}
+		
 		result = dlg.ShowModal();
 	}
 	if (result == wxID_CANCEL)
@@ -4520,7 +4523,7 @@ void OutfitStudioFrame::OnLoadOutfit(wxCommandEvent& WXUNUSED(event)) {
 		}
 	}
 
-	bool keepShapes = XRCCTRL(dlg, "npWorkAdd", wxCheckBox)->IsChecked();
+	keepShapes = XRCCTRL(dlg, "npWorkAdd", wxCheckBox)->IsChecked();
 	UpdateProgress(1, _("Loading outfit..."));
 
 	int ret = 0;
